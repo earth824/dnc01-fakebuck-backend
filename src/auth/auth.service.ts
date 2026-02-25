@@ -2,6 +2,7 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { LoginDto } from 'src/auth/dtos/login.dto';
 import { RegisterDto } from 'src/auth/dtos/register.dto';
 import { User } from 'src/database/generated/prisma/client';
+import { AuthTokenService } from 'src/shared/security/services/auth-token.service';
 import { BcryptService } from 'src/shared/security/services/bcrypt.service';
 import { UserService } from 'src/user/user.service';
 
@@ -9,16 +10,18 @@ import { UserService } from 'src/user/user.service';
 export class AuthService {
   constructor(
     private readonly userService: UserService,
-    private readonly bcryptService: BcryptService
+    private readonly bcryptService: BcryptService,
+    private readonly authTokenService: AuthTokenService
   ) {}
 
   async register(registerDto: RegisterDto): Promise<void> {
     await this.userService.create(registerDto);
   }
 
-  async login(
-    loginDto: LoginDto
-  ): Promise<{ accessToken: string; user: User }> {
+  async login(loginDto: LoginDto): Promise<{
+    accessToken: string;
+    user: Omit<User, 'password'>;
+  }> {
     const user = await this.userService.findByEmail(loginDto.email);
     if (!user)
       throw new UnauthorizedException({
@@ -36,8 +39,11 @@ export class AuthService {
         code: 'INVALID_CREDENTIALS'
       });
 
-    // 3. Gen access token
-    const accessToken = 'xxx';
-    return { accessToken, user };
+    const accessToken = await this.authTokenService.sign({
+      sub: user.id,
+      email: user.email
+    });
+    const { password, ...rest } = user;
+    return { accessToken, user: rest };
   }
 }

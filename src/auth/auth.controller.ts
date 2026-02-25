@@ -8,7 +8,7 @@ export class AuthController {
 
   @Post('register')
   async register(@Body() registerDto: RegisterDto): Promise<string> {
-    await this.authService.register();
+    await this.authService.register(registerDto);
     return 'Account created successfully';
   }
 }

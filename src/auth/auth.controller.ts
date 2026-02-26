@@ -13,6 +13,7 @@ import { LoginDto } from 'src/auth/dtos/login.dto';
 import { RegisterDto } from 'src/auth/dtos/register.dto';
 import type { JwtPayload } from 'src/auth/types/jwt-payload.type';
 import { User } from 'src/database/generated/prisma/client';
+import { UserWithoutPassword } from 'src/user/types/user.type';
 
 @Controller('auth')
 export class AuthController {
@@ -30,10 +31,14 @@ export class AuthController {
   @Post('login')
   async login(
     @Body() loginDto: LoginDto
-  ): Promise<{ accessToken: string; user: Omit<User, 'password'> }> {
+  ): Promise<{ accessToken: string; user: UserWithoutPassword }> {
     return this.authService.login(loginDto);
   }
 
   @Get('me')
-  async getCurrentUser(@CurrentUser() user: JwtPayload) {}
+  async getCurrentUser(
+    @CurrentUser() user: JwtPayload
+  ): Promise<UserWithoutPassword> {
+    return this.authService.getCurrentUser(user.sub);
+  }
 }

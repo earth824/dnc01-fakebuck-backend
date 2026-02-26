@@ -48,4 +48,6 @@ model Friend {
   userA     User @relation("userA", fields: [userAId], references: [id], onDelete: Cascade)
   userB     User @relation("userB", fields: [userBId], references: [id], onDelete: Cascade)
   requester User @relation("requester", fields: [requesterId], references: [id], onDelete: Cascade)
+
+  @@unique([userAId, userBId])
 }

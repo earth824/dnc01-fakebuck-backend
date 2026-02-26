@@ -44,4 +44,65 @@ export class FriendRequestService {
       throw error;
     }
   }
+
+  async cancelRequest(requesterId: string, recipientId: string): Promise<void> {
+    const result = await this.prisma.friend.deleteMany({
+      where: {
+        status: 'PENDING',
+        requesterId,
+        OR: [
+          {
+            userAId: requesterId,
+            userBId: recipientId
+          },
+          {
+            userAId: recipientId,
+            userBId: requesterId
+          }
+        ]
+      }
+    });
+    if (result.count === 0)
+      throw new NotFoundException({
+        message: 'These user relation cannot be found',
+        code: 'RELATION_NOT_FOUND'
+      });
+  }
+
+  async acceptRequest(requesterId: string, recipientId: string): Promise<void> {
+    const result = await this.prisma.friend.updateMany({
+      data: { status: 'ACCEPTED' },
+      where: {
+        status: 'PENDING',
+        requesterId,
+        OR: [
+          { userAId: requesterId, userBId: recipientId },
+          { userAId: recipientId, userBId: requesterId }
+        ]
+      }
+    });
+    if (result.count === 0)
+      throw new NotFoundException({
+        message: 'These user relation cannot be found',
+        code: 'RELATION_NOT_FOUND'
+      });
+  }
+
+  async rejectRequest(requesterId: string, recipientId: string): Promise<void> {
+    const result = await this.prisma.friend.deleteMany({
+      where: {
+        status: 'PENDING',
+        requesterId,
+        OR: [
+          { userAId: requesterId, userBId: recipientId },
+          { userAId: recipientId, userBId: requesterId }
+        ]
+      }
+    });
+    if (result.count === 0)
+      throw new NotFoundException({
+        message: 'These user relation cannot be found',
+        code: 'RELATION_NOT_FOUND'
+      });
+  }
 }

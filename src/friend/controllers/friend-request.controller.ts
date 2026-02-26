@@ -1,4 +1,11 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Param,
+  ParseUUIDPipe,
+  Post
+} from '@nestjs/common';
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
 import type { JwtPayload } from 'src/auth/types/jwt-payload.type';
 import { ResponseMessage } from 'src/common/decorators/message-response.decorator';
@@ -19,5 +26,35 @@ export class FriendRequestController {
       user.sub,
       recipientIdDto.recipientId
     );
+  }
+
+  @ResponseMessage('The request has been cancelled')
+  @Delete(':recipientId')
+  async cancelRequest(
+    @Param() recipientIdDto: RecipientIdDto,
+    @CurrentUser() user: JwtPayload
+  ): Promise<void> {
+    await this.friendRequestService.cancelRequest(
+      user.sub,
+      recipientIdDto.recipientId
+    );
+  }
+
+  @ResponseMessage('The request has been accepted')
+  @Post(':requesterId/accept')
+  async acceptRequest(
+    @Param('requesterId', ParseUUIDPipe) requesterId: string,
+    @CurrentUser() user: JwtPayload
+  ) {
+    await this.friendRequestService.acceptRequest(requesterId, user.sub);
+  }
+
+  @ResponseMessage('Request rejected successfully')
+  @Post(':requesterId/reject')
+  async rejectRequest(
+    @Param('requesterId', ParseUUIDPipe) requesterId: string,
+    @CurrentUser() user: JwtPayload
+  ) {
+    await this.friendRequestService.rejectRequest(requesterId, user.sub);
   }
 }

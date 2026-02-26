@@ -59,4 +59,14 @@ export class UserService {
 
     return user;
   }
+
+  async uploadAvatar(file: Express.Multer.File): Promise<string> {
+    // 1. Upload to cloud
+    // 2. Update avatar url in the database
+  }
+
+  async uploadCover(file: Express.Multer.File): Promise<string> {
+    // 1. Upload to cloud
+    // 2. Update cover url in the database
+  }
 }

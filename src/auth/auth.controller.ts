@@ -7,9 +7,11 @@ import {
   Post
 } from '@nestjs/common';
 import { AuthService } from 'src/auth/auth.service';
+import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
 import { Public } from 'src/auth/decorators/public.decorator';
 import { LoginDto } from 'src/auth/dtos/login.dto';
 import { RegisterDto } from 'src/auth/dtos/register.dto';
+import type { JwtPayload } from 'src/auth/types/jwt-payload.type';
 import { User } from 'src/database/generated/prisma/client';
 
 @Controller('auth')
@@ -33,5 +35,5 @@ export class AuthController {
   }
 
   @Get('me')
-  async getCurrentUser() {}
+  async getCurrentUser(@CurrentUser() user: JwtPayload) {}
 }

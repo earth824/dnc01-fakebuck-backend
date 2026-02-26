@@ -1,11 +1,12 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from './config/config.module';
 import { DatabaseModule } from './database/database.module';
-import { APP_GUARD } from '@nestjs/core';
+import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { AuthGuard } from 'src/auth/guards/auth.guard';
 import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
 import { SecurityModule } from './shared/security/security.module';
+import { TransformInterceptor } from 'src/common/interceptors/transform.interceptor';
 
 @Module({
   imports: [
@@ -15,6 +16,9 @@ import { SecurityModule } from './shared/security/security.module';
     UserModule,
     SecurityModule
   ],
-  providers: [{ provide: APP_GUARD, useClass: AuthGuard }]
+  providers: [
+    { provide: APP_GUARD, useClass: AuthGuard },
+    { provide: APP_INTERCEPTOR, useClass: TransformInterceptor }
+  ]
 })
 export class AppModule {}

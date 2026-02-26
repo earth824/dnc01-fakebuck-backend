@@ -10,10 +10,16 @@ export class AuthTokenService {
     private readonly jwtService: JwtService
   ) {}
 
-  sign(payload: JwtPayload): Promise<string> {
+  sign(payload: Omit<JwtPayload, 'iat' | 'exp'>): Promise<string> {
     return this.jwtService.signAsync(payload, {
       secret: this.typedConfigService.get('JWT_SECRET'),
       expiresIn: this.typedConfigService.get('JWT_EXPIRES_IN')
+    });
+  }
+
+  verify(token: string): Promise<JwtPayload> {
+    return this.jwtService.verifyAsync(token, {
+      secret: this.typedConfigService.get('JWT_SECRET')
     });
   }
 }

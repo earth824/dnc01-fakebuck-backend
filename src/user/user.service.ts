@@ -7,14 +7,17 @@ import { User } from 'src/database/generated/prisma/client';
 import { PrismaClientKnownRequestError } from 'src/database/generated/prisma/internal/prismaNamespace';
 import { PrismaService } from 'src/database/prisma.service';
 import { BcryptService } from 'src/shared/security/services/bcrypt.service';
+import { CloudinaryService } from 'src/shared/upload/cloudinary.service';
 import { CreateUserDto } from 'src/user/dtos/create-user.dto';
+import { UpdateUserDto } from 'src/user/dtos/update-user.dto';
 import { UserWithoutPassword } from 'src/user/types/user.type';
 
 @Injectable()
 export class UserService {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly bcryptService: BcryptService
+    private readonly bcryptService: BcryptService,
+    private readonly cloudinaryService: CloudinaryService
   ) {}
 
   async create(createUserDto: CreateUserDto): Promise<User> {
@@ -60,13 +63,30 @@ export class UserService {
     return user;
   }
 
-  async uploadAvatar(file: Express.Multer.File): Promise<string> {
-    // 1. Upload to cloud
-    // 2. Update database
+  async uploadAvatar(
+    userId: string,
+    file: Express.Multer.File
+  ): Promise<string> {
+    const result = await this.cloudinaryService.upload(file);
+    await this.update(userId, { avatarUrl: result.secure_url });
+
+    return result.secure_url;
   }
 
   async uploadCover(file: Express.Multer.File): Promise<string> {
     // 1. Upload to cloud
     // 2. Update cover url in the database
+    return '';
+  }
+
+  async update(
+    id: string,
+    updateUserDto: UpdateUserDto
+  ): Promise<UserWithoutPassword> {
+    return this.prisma.user.update({
+      where: { id },
+      data: updateUserDto,
+      omit: { password: true }
+    });
   }
 }

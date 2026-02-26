@@ -7,6 +7,7 @@ import {
   Post
 } from '@nestjs/common';
 import { AuthService } from 'src/auth/auth.service';
+import { Public } from 'src/auth/decorators/public.decorator';
 import { LoginDto } from 'src/auth/dtos/login.dto';
 import { RegisterDto } from 'src/auth/dtos/register.dto';
 import { User } from 'src/database/generated/prisma/client';
@@ -15,12 +16,14 @@ import { User } from 'src/database/generated/prisma/client';
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
+  @Public()
   @Post('register')
   async register(@Body() registerDto: RegisterDto): Promise<string> {
     await this.authService.register(registerDto);
     return 'Account created successfully';
   }
 
+  @Public()
   @HttpCode(HttpStatus.OK)
   @Post('login')
   async login(

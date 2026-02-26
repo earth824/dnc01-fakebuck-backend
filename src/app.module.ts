@@ -7,6 +7,7 @@ import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
 import { SecurityModule } from './shared/security/security.module';
 import { TransformInterceptor } from 'src/common/interceptors/transform.interceptor';
+import { FriendModule } from './friend/friend.module';
 
 @Module({
   imports: [
@@ -14,7 +15,8 @@ import { TransformInterceptor } from 'src/common/interceptors/transform.intercep
     DatabaseModule,
     AuthModule,
     UserModule,
-    SecurityModule
+    SecurityModule,
+    FriendModule
   ],
   providers: [
     { provide: APP_GUARD, useClass: AuthGuard },

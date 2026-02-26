@@ -62,7 +62,7 @@ export class UserService {
 
   async uploadAvatar(file: Express.Multer.File): Promise<string> {
     // 1. Upload to cloud
-    // 2. Update avatar url in the database
+    // 2. Update database
   }
 
   async uploadCover(file: Express.Multer.File): Promise<string> {

@@ -12,18 +12,18 @@ import { Public } from 'src/auth/decorators/public.decorator';
 import { LoginDto } from 'src/auth/dtos/login.dto';
 import { RegisterDto } from 'src/auth/dtos/register.dto';
 import type { JwtPayload } from 'src/auth/types/jwt-payload.type';
-import { User } from 'src/database/generated/prisma/client';
+import { ResponseMessage } from 'src/common/decorators/message-response.decorator';
 import { UserWithoutPassword } from 'src/user/types/user.type';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
+  @ResponseMessage('Account created successfully')
   @Public()
   @Post('register')
-  async register(@Body() registerDto: RegisterDto): Promise<string> {
+  async register(@Body() registerDto: RegisterDto): Promise<void> {
     await this.authService.register(registerDto);
-    return 'Account created successfully';
   }
 
   @Public()

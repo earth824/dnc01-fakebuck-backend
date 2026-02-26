@@ -24,7 +24,10 @@ export class UserController {
 
   @UseInterceptors(FileInterceptor('cover'))
   @Patch('me/cover')
-  uploadCover(@UploadedFile() file: Express.Multer.File): Promise<string> {
-    return this.userService.uploadCover(file);
+  uploadCover(
+    @UploadedFile() file: Express.Multer.File,
+    @CurrentUser() user: JwtPayload
+  ): Promise<string> {
+    return this.userService.uploadCover(user.sub, file);
   }
 }

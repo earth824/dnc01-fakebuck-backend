@@ -73,10 +73,14 @@ export class UserService {
     return result.secure_url;
   }
 
-  async uploadCover(file: Express.Multer.File): Promise<string> {
-    // 1. Upload to cloud
-    // 2. Update cover url in the database
-    return '';
+  async uploadCover(
+    userId: string,
+    file: Express.Multer.File
+  ): Promise<string> {
+    const result = await this.cloudinaryService.upload(file);
+    await this.update(userId, { coverUrl: result.secure_url });
+
+    return result.secure_url;
   }
 
   async update(

@@ -66,4 +66,11 @@ export class FriendRequestController {
   ): Promise<UserWithoutPassword[]> {
     return this.friendRequestService.findIncomingRequest(user.sub);
   }
+
+  @Get('outgoing')
+  async findOutgoingRequest(
+    @CurrentUser() user: JwtPayload
+  ): Promise<UserWithoutPassword[]> {
+    return this.friendRequestService.findOutgoingRequest(user.sub);
+  }
 }

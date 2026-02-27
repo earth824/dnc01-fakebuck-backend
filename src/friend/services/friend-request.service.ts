@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { PrismaClientKnownRequestError } from 'src/database/generated/prisma/internal/prismaNamespace';
 import { PrismaService } from 'src/database/prisma.service';
+import { UserWithoutPassword } from 'src/user/types/user.type';
 
 @Injectable()
 export class FriendRequestService {
@@ -104,5 +105,28 @@ export class FriendRequestService {
         message: 'These user relation cannot be found',
         code: 'RELATION_NOT_FOUND'
       });
+  }
+
+  async findIncomingRequest(
+    currentUserId: string
+  ): Promise<UserWithoutPassword[]> {
+    const result = await this.prisma.friend.findMany({
+      where: {
+        status: 'PENDING',
+        requesterId: {
+          not: currentUserId
+        },
+        userAId: currentUserId
+      },
+      select: {
+        requester: {
+          omit: {
+            password: true
+          }
+        }
+      }
+    });
+
+    return result.map((el) => el.requester);
   }
 }

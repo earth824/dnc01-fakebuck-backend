@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Delete,
+  Get,
   Param,
   ParseUUIDPipe,
   Post
@@ -11,6 +12,7 @@ import type { JwtPayload } from 'src/auth/types/jwt-payload.type';
 import { ResponseMessage } from 'src/common/decorators/message-response.decorator';
 import { RecipientIdDto } from 'src/friend/dtos/recipient-id.dto';
 import { FriendRequestService } from 'src/friend/services/friend-request.service';
+import { UserWithoutPassword } from 'src/user/types/user.type';
 
 @Controller('friends/requests')
 export class FriendRequestController {
@@ -56,5 +58,12 @@ export class FriendRequestController {
     @CurrentUser() user: JwtPayload
   ) {
     await this.friendRequestService.rejectRequest(requesterId, user.sub);
+  }
+
+  @Get('incoming')
+  async findIncomingRequest(
+    @CurrentUser() user: JwtPayload
+  ): Promise<UserWithoutPassword[]> {
+    return this.friendRequestService.findIncomingRequest(user.sub);
   }
 }

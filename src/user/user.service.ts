@@ -142,4 +142,28 @@ export class UserService {
       relationshipStatus
     };
   }
+
+  async findAll(search: string = ''): Promise<UserWithoutPassword[]> {
+    return this.prisma.user.findMany({
+      where: {
+        OR: [
+          {
+            firstName: {
+              contains: search,
+              mode: 'insensitive'
+            }
+          },
+          {
+            lastName: {
+              contains: search,
+              mode: 'insensitive'
+            }
+          }
+        ]
+      },
+      omit: {
+        password: true
+      }
+    });
+  }
 }

@@ -2,7 +2,6 @@ import {
   Controller,
   Get,
   Param,
-  ParseBoolPipe,
   ParseUUIDPipe,
   Patch,
   Query,
@@ -11,6 +10,7 @@ import {
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
+import { Public } from 'src/auth/decorators/public.decorator';
 import type { JwtPayload } from 'src/auth/types/jwt-payload.type';
 import { RelationshipStatus } from 'src/friend/types/friend.type';
 import { UserWithoutPassword } from 'src/user/types/user.type';
@@ -50,5 +50,13 @@ export class UserController {
       userId,
       user.sub
     );
+  }
+
+  @Public()
+  @Get()
+  async findAll(
+    @Query('search') search?: string
+  ): Promise<UserWithoutPassword[]> {
+    return this.userService.findAll(search);
   }
 }

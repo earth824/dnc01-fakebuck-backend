@@ -1,6 +1,11 @@
 import {
   Controller,
+  Get,
+  Param,
+  ParseBoolPipe,
+  ParseUUIDPipe,
   Patch,
+  Query,
   UploadedFile,
   UseInterceptors
 } from '@nestjs/common';
@@ -29,5 +34,19 @@ export class UserController {
     @CurrentUser() user: JwtPayload
   ): Promise<string> {
     return this.userService.uploadCover(user.sub, file);
+  }
+
+  @Get(':userId')
+  async findById(
+    @CurrentUser() user: JwtPayload,
+    @Param('userId', ParseUUIDPipe) userId: string,
+    @Query('friend', ParseBoolPipe) includeFriend?: boolean
+    // @Query('relationshipStatus', ParseBoolPipe) relationshipStatus?: boolean
+  ) {
+    return await this.userService.findByIdWithRelationToCurrentUser(
+      userId,
+      user.sub,
+      includeFriend
+    );
   }
 }

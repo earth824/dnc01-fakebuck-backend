@@ -93,4 +93,46 @@ export class UserService {
       omit: { password: true }
     });
   }
+
+  async findByIdWithRelationToCurrentUser(
+    userId: string,
+    currentUserId: string,
+    includeFriend?: boolean
+  ) {
+    const result = await this.prisma.user.findUnique({
+      where: { id: userId },
+      include: {
+        usersA: {
+          where: {
+            status: 'ACCEPTED'
+          },
+          include: {
+            userB: {
+              omit: {
+                password: true
+              }
+            }
+          }
+        }
+      },
+      omit: {
+        password: true
+      }
+    });
+
+    if (!result) {
+      throw Error('');
+    }
+
+    const relation = await this.prisma.friend.findFirst({
+      where: {
+        userAId: userId,
+        userBId: currentUserId
+      }
+    });
+
+    const { usersA, ...user } = result;
+
+    return { ...user, friends: usersA.map((el) => el.userB) };
+  }
 }

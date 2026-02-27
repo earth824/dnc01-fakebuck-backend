@@ -3,6 +3,8 @@ import {
   Controller,
   Delete,
   Get,
+  HttpCode,
+  HttpStatus,
   Param,
   ParseUUIDPipe,
   Post
@@ -42,6 +44,7 @@ export class FriendRequestController {
     );
   }
 
+  @HttpCode(HttpStatus.OK)
   @ResponseMessage('The request has been accepted')
   @Post(':requesterId/accept')
   async acceptRequest(
@@ -51,6 +54,7 @@ export class FriendRequestController {
     await this.friendRequestService.acceptRequest(requesterId, user.sub);
   }
 
+  @HttpCode(HttpStatus.OK)
   @ResponseMessage('Request rejected successfully')
   @Post(':requesterId/reject')
   async rejectRequest(

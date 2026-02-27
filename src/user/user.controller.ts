@@ -12,6 +12,8 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
 import type { JwtPayload } from 'src/auth/types/jwt-payload.type';
+import { RelationshipStatus } from 'src/friend/types/friend.type';
+import { UserWithoutPassword } from 'src/user/types/user.type';
 import { UserService } from 'src/user/user.service';
 
 @Controller('users')
@@ -36,17 +38,17 @@ export class UserController {
     return this.userService.uploadCover(user.sub, file);
   }
 
-  @Get(':userId')
-  async findById(
+  @Get(':userId/profile')
+  async findProfileById(
     @CurrentUser() user: JwtPayload,
-    @Param('userId', ParseUUIDPipe) userId: string,
-    @Query('friend', ParseBoolPipe) includeFriend?: boolean
-    // @Query('relationshipStatus', ParseBoolPipe) relationshipStatus?: boolean
-  ) {
+    @Param('userId', ParseUUIDPipe) userId: string
+  ): Promise<{
+    user: UserWithoutPassword & { friends: UserWithoutPassword[] };
+    relationshipStatus: RelationshipStatus;
+  }> {
     return await this.userService.findByIdWithRelationToCurrentUser(
       userId,
-      user.sub,
-      includeFriend
+      user.sub
     );
   }
 }

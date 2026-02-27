@@ -6,6 +6,8 @@ import {
 import { User } from 'src/database/generated/prisma/client';
 import { PrismaClientKnownRequestError } from 'src/database/generated/prisma/internal/prismaNamespace';
 import { PrismaService } from 'src/database/prisma.service';
+import { FriendService } from 'src/friend/services/friend.service';
+import { RelationshipStatus } from 'src/friend/types/friend.type';
 import { BcryptService } from 'src/shared/security/services/bcrypt.service';
 import { CloudinaryService } from 'src/shared/upload/cloudinary.service';
 import { CreateUserDto } from 'src/user/dtos/create-user.dto';
@@ -17,7 +19,8 @@ export class UserService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly bcryptService: BcryptService,
-    private readonly cloudinaryService: CloudinaryService
+    private readonly cloudinaryService: CloudinaryService,
+    private readonly friendService: FriendService
   ) {}
 
   async create(createUserDto: CreateUserDto): Promise<User> {
@@ -96,9 +99,11 @@ export class UserService {
 
   async findByIdWithRelationToCurrentUser(
     userId: string,
-    currentUserId: string,
-    includeFriend?: boolean
-  ) {
+    currentUserId: string
+  ): Promise<{
+    user: UserWithoutPassword & { friends: UserWithoutPassword[] };
+    relationshipStatus: RelationshipStatus;
+  }> {
     const result = await this.prisma.user.findUnique({
       where: { id: userId },
       include: {
@@ -124,15 +129,17 @@ export class UserService {
       throw Error('');
     }
 
-    const relation = await this.prisma.friend.findFirst({
-      where: {
-        userAId: userId,
-        userBId: currentUserId
-      }
-    });
+    const relationshipStatus =
+      await this.friendService.findRelationshipBetweenTwoUser(
+        userId,
+        currentUserId
+      );
 
     const { usersA, ...user } = result;
 
-    return { ...user, friends: usersA.map((el) => el.userB) };
+    return {
+      user: { ...user, friends: usersA.map((el) => el.userB) },
+      relationshipStatus
+    };
   }
 }

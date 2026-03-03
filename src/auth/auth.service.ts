@@ -1,6 +1,7 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { LoginDto } from 'src/auth/dtos/login.dto';
 import { RegisterDto } from 'src/auth/dtos/register.dto';
+import { TypedConfigService } from 'src/config/typed-config.service';
 import { User } from 'src/database/generated/prisma/client';
 import { AuthTokenService } from 'src/shared/security/services/auth-token.service';
 import { BcryptService } from 'src/shared/security/services/bcrypt.service';
@@ -12,7 +13,8 @@ export class AuthService {
   constructor(
     private readonly userService: UserService,
     private readonly bcryptService: BcryptService,
-    private readonly authTokenService: AuthTokenService
+    private readonly authTokenService: AuthTokenService,
+    private readonly typedConfigService: TypedConfigService
   ) {}
 
   async register(registerDto: RegisterDto): Promise<void> {
@@ -22,6 +24,7 @@ export class AuthService {
   async login(loginDto: LoginDto): Promise<{
     accessToken: string;
     user: Omit<User, 'password'>;
+    expiresIn: number;
   }> {
     const user = await this.userService.findByEmail(loginDto.email);
     if (!user)
@@ -45,7 +48,11 @@ export class AuthService {
       email: user.email
     });
     const { password, ...rest } = user;
-    return { accessToken, user: rest };
+    return {
+      accessToken,
+      user: rest,
+      expiresIn: this.typedConfigService.get('JWT_EXPIRES_IN')
+    };
   }
 
   async getCurrentUser(id: string): Promise<UserWithoutPassword> {

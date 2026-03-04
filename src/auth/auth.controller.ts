@@ -6,9 +6,16 @@ import {
   HttpStatus,
   Post
 } from '@nestjs/common';
+import {
+  ApiBadRequestResponse,
+  ApiBearerAuth,
+  ApiOkResponse,
+  ApiUnauthorizedResponse
+} from '@nestjs/swagger';
 import { AuthService } from 'src/auth/auth.service';
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
 import { Public } from 'src/auth/decorators/public.decorator';
+import { LoginResponseDto } from 'src/auth/dtos/login-response.dto';
 import { LoginDto } from 'src/auth/dtos/login.dto';
 import { RegisterDto } from 'src/auth/dtos/register.dto';
 import type { JwtPayload } from 'src/auth/types/jwt-payload.type';
@@ -26,6 +33,14 @@ export class AuthController {
     await this.authService.register(registerDto);
   }
 
+  @ApiOkResponse({
+    description: 'Successful operation',
+    type: LoginResponseDto
+  })
+  @ApiUnauthorizedResponse({
+    description: 'The provided credentials is invalid'
+  })
+  @ApiBadRequestResponse()
   @Public()
   @HttpCode(HttpStatus.OK)
   @Post('login')
@@ -37,6 +52,7 @@ export class AuthController {
     return this.authService.login(loginDto);
   }
 
+  @ApiBearerAuth()
   @Get('me')
   async getCurrentUser(
     @CurrentUser() user: JwtPayload

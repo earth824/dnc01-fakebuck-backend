@@ -166,4 +166,29 @@ export class UserService {
       }
     });
   }
+
+  async findAllWithNoRelationship(
+    currentUserId: string
+  ): Promise<UserWithoutPassword[]> {
+    const withRelationUsers = await this.prisma.friend.findMany({
+      where: {
+        userAId: currentUserId
+      },
+      select: {
+        userBId: true
+      }
+    });
+
+    const noRelationUsers = await this.prisma.user.findMany({
+      where: {
+        id: {
+          notIn: [...withRelationUsers.map((el) => el.userBId), currentUserId]
+        }
+      },
+      omit: {
+        password: true
+      }
+    });
+    return noRelationUsers;
+  }
 }

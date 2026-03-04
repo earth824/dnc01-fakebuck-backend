@@ -59,4 +59,11 @@ export class UserController {
   ): Promise<UserWithoutPassword[]> {
     return this.userService.findAll(search);
   }
+
+  @Get('relationship/none')
+  async findAllWithNoRelationship(
+    @CurrentUser() user: JwtPayload
+  ): Promise<UserWithoutPassword[]> {
+    return this.userService.findAllWithNoRelationship(user.sub);
+  }
 }
